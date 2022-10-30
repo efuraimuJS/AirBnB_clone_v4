@@ -1,0 +1,41 @@
+name: Converted Workflow
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-18.04
+        python-version:
+          - '3.4'
+
+    steps:
+    - uses: mirromutth/mysql-action@v1.1
+      with:
+        host port: 3306 # Optional, default value is 3306. The port of host
+        container port: 3306 # Optional, default value is 3306. The port of container
+        character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+        collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+        mysql version: '5.7.18' # Optional, default value is "latest". The version of the MySQL
+        mysql database: 'hbnb_test_db' # Optional, default value is "test". The specified database which will be create
+        mysql root password: '' # Required if "mysql user" is empty, default is empty. The root superuser password
+        mysql user: 'hbnb_test' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+        mysql password: 'hbnb_test_pwd' # Required if "mysql user" exists. The password for the "mysql user"
+    
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '${{ matrix.python-version }}'
+    - uses: actions/checkout@v2
+    - run: sudo apt-get update
+    - run: sudo pip install --upgrade pip
+    - run: sudo apt-get install --upgrade python3-pip
+    - run: pip install -r requirements.txt
+    - run: ./dev/travis_init_test.sh
